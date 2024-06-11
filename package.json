@@ -74,7 +74,7 @@
     "jose": "5.4.0",
     "jszip": "3.10.1",
     "mkdirp": "1.0.4",
-    "multimatch": "6.0.0",
+    "multimatch": "7.0.0",
     "mz": "2.7.0",
     "node-fetch": "3.3.2",
     "node-notifier": "10.0.1",
