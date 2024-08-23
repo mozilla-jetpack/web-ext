@@ -76,7 +76,7 @@
     "node-fetch": "3.3.2",
     "node-notifier": "10.0.1",
     "open": "9.1.0",
-    "parse-json": "7.1.1",
+    "parse-json": "8.1.0",
     "promise-toolbox": "0.21.0",
     "source-map-support": "0.5.21",
     "strip-bom": "5.0.0",
