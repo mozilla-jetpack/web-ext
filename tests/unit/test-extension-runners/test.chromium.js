@@ -47,7 +47,7 @@ function prepareExtensionRunnerParams({ params } = {}) {
 
 describe('util/extension-runners/chromium', async () => {
   it('uses the expected chrome flags', () => {
-    // Flags from chrome-launcher v0.14.0
+    // Flags from chrome-launcher v1.1.2
     const expectedFlags = [
       '--disable-features=Translate,OptimizationHints,MediaRouter,DialMediaRouteProvider,CalculateNativeWinOcclusion,InterestFeedContentSuggestions,CertificateTransparencyComponentUpdater,AutofillServerCommunication,PrivacySandboxSettings4',
       '--disable-component-extensions-with-background-pages',
@@ -618,6 +618,56 @@ describe('util/extension-runners/chromium', async () => {
         spy.restore();
       }),
   );
+
+  it('does pass default prefs to chrome', async () => {
+    const { params } = prepareExtensionRunnerParams();
+
+    const runnerInstance = new ChromiumExtensionRunner(params);
+    await runnerInstance.run();
+
+    sinon.assert.calledOnce(params.chromiumLaunch);
+    sinon.assert.calledWithMatch(params.chromiumLaunch, {
+      prefs: {
+        extensions: {
+          ui: {
+            developer_mode: true,
+          },
+        },
+      },
+    });
+
+    await runnerInstance.exit();
+  });
+
+  it('does pass custom prefs to chrome', async () => {
+    const { params } = prepareExtensionRunnerParams({
+      params: {
+        customChromiumPrefs: {
+          'download.default_directory': '/some/directory',
+          'extensions.ui.developer_mode': false,
+        },
+      },
+    });
+
+    const runnerInstance = new ChromiumExtensionRunner(params);
+    await runnerInstance.run();
+
+    sinon.assert.calledOnce(params.chromiumLaunch);
+    sinon.assert.calledWithMatch(params.chromiumLaunch, {
+      prefs: {
+        download: {
+          default_directory: '/some/directory',
+        },
+        extensions: {
+          ui: {
+            developer_mode: false,
+          },
+        },
+      },
+    });
+
+    await runnerInstance.exit();
+  });
 
   describe('reloadAllExtensions', () => {
     let runnerInstance;

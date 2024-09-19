@@ -16,6 +16,7 @@ import { createLogger } from '../util/logger.js';
 import { TempDir } from '../util/temp-dir.js';
 import isDirectory from '../util/is-directory.js';
 import fileExists from '../util/file-exists.js';
+import expandPrefs from '../util/expand-prefs.js';
 
 const log = createLogger(import.meta.url);
 
@@ -24,6 +25,10 @@ const EXCLUDED_CHROME_FLAGS = ['--disable-extensions', '--mute-audio'];
 export const DEFAULT_CHROME_FLAGS = ChromeLauncher.defaultFlags().filter(
   (flag) => !EXCLUDED_CHROME_FLAGS.includes(flag),
 );
+
+const DEFAULT_PREFS = {
+  'extensions.ui.developer_mode': true,
+};
 
 /**
  * Implements an IExtensionRunner which manages a Chromium instance.
@@ -210,6 +215,7 @@ export class ChromiumExtensionRunner {
       userDataDir,
       // Ignore default flags to keep the extension enabled.
       ignoreDefaultFlags: true,
+      prefs: this.getPrefs(),
     });
 
     this.chromiumInstance.process.once('close', () => {
@@ -413,5 +419,16 @@ export class ChromiumExtensionRunner {
         log.error(error);
       }
     }
+  }
+
+  /**
+   * Returns a deep preferences object based on a set of flat preferences, like
+   * "extensions.ui.developer_mode".
+   */
+  getPrefs() {
+    return expandPrefs({
+      ...DEFAULT_PREFS,
+      ...(this.params.customChromiumPrefs || {}),
+    });
   }
 }

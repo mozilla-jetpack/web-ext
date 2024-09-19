@@ -614,6 +614,27 @@ describe('program.main', () => {
     });
   });
 
+  it('converts custom chromium preferences into an object', () => {
+    const fakeCommands = fake(commands, {
+      run: () => Promise.resolve(),
+    });
+    return execProgram(
+      [
+        'run',
+        '--chromium-pref',
+        'prop=true',
+        '--chromium-pref',
+        'prop2=value2',
+      ],
+      { commands: fakeCommands },
+    ).then(() => {
+      const { chromiumPref } = fakeCommands.run.firstCall.args[0];
+      assert.isObject(chromiumPref);
+      assert.equal(chromiumPref.prop, true);
+      assert.equal(chromiumPref.prop2, 'value2');
+    });
+  });
+
   it('passes shouldExitProgram option to commands', () => {
     const fakeCommands = fake(commands, {
       lint: () => Promise.resolve(),

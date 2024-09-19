@@ -14,6 +14,7 @@ import {
   consoleStream as defaultLogStream,
 } from './util/logger.js';
 import { coerceCLICustomPreference } from './firefox/preferences.js';
+import { coerceCLICustomChromiumPreference } from './util/chromium-preferences.js';
 import { checkForUpdates as defaultUpdateChecker } from './util/updates.js';
 import {
   discoverConfigFiles as defaultConfigDiscovery,
@@ -615,6 +616,18 @@ Example: $0 --help run.
           'If not specified, the default Google Chrome will be used.',
         demandOption: false,
         type: 'string',
+      },
+      'chromium-pref': {
+        describe:
+          'Launch chromium with a custom preference ' +
+          '(example: --chromium-pref=browser.theme.follows_system_colors=false). ' +
+          'You can repeat this option to set more than one ' +
+          'preference.',
+        demandOption: false,
+        requiresArg: true,
+        type: 'array',
+        coerce: (arg) =>
+          arg != null ? coerceCLICustomChromiumPreference(arg) : undefined,
       },
       'chromium-profile': {
         describe: 'Path to a custom Chromium profile',

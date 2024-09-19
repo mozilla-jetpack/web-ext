@@ -50,6 +50,7 @@ export default async function run(
     firefoxApkComponent,
     // Chromium CLI options.
     chromiumBinary,
+    chromiumPref,
     chromiumProfile,
   },
   {
@@ -83,6 +84,11 @@ export default async function run(
   // Create an alias for --pref since it has been transformed into an
   // object containing one or more preferences.
   const customPrefs = { ...pref };
+
+  // Create an alias for --chromium-pref since it has been transformed into an
+  // object containing one or more preferences.
+  const customChromiumPrefs = { ...chromiumPref };
+
   const manifestData = await getValidatedManifest(sourceDir);
 
   const profileDir = firefoxProfile || chromiumProfile;
@@ -190,6 +196,7 @@ export default async function run(
       ...commonRunnerParams,
       chromiumBinary,
       chromiumProfile,
+      customChromiumPrefs,
     };
 
     const chromiumRunner = await createExtensionRunner({
