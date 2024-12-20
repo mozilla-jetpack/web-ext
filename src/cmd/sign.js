@@ -66,7 +66,18 @@ export default function sign(
     if (idFromSourceDir && !id) {
       throw new UsageError(
         'Cannot use previously auto-generated extension ID ' +
-          `${idFromSourceDir} - This extension ID must be specified in the manifest.json file.`,
+          `${idFromSourceDir} - This extension ID must be specified in the manifest.json file. For example:
+
+    // manifest.json
+    {
+        "browser_specific_settings": {
+            "gecko": {
+                "id": "${idFromSourceDir}"
+            }
+        },
+
+    ...
+    }`,
       );
     }
 
