@@ -64,7 +64,7 @@
     "addons-linter": "7.6.0",
     "camelcase": "8.0.0",
     "chrome-launcher": "1.1.2",
-    "debounce": "1.2.1",
+    "debounce": "2.2.0",
     "decamelize": "6.0.0",
     "es6-error": "4.1.1",
     "firefox-profile": "4.7.0",
