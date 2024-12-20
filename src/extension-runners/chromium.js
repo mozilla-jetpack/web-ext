@@ -130,8 +130,37 @@ export class ChromiumExtensionRunner {
       });
     });
 
+    const chromeFlags = [...DEFAULT_CHROME_FLAGS];
+    let startingUrl;
+    let specialStartingUrls = [];
+    if (this.params.startUrl) {
+      const specialUrlFormats = ['chrome://', 'chrome-extension://'];
+      const startingUrls = Array.isArray(this.params.startUrl)
+        ? this.params.startUrl
+        : [this.params.startUrl];
+
+      // Extract URLs starting with chrome:// from startingUrls and let bg.js open them instead
+      specialStartingUrls = startingUrls.filter((item) =>
+        specialUrlFormats.some((format) =>
+          item.toLowerCase().startsWith(format)
+        )
+      );
+
+      const strippedStartingUrls = startingUrls.filter(
+        (item) =>
+          !specialUrlFormats.some((format) =>
+            item.toLowerCase().startsWith(format)
+          )
+      );
+
+      startingUrl = strippedStartingUrls.shift();
+      chromeFlags.push(...strippedStartingUrls);
+    }
+
     // Create the extension that will manage the addon reloads
-    this.reloadManagerExtension = await this.createReloadManagerExtension();
+    this.reloadManagerExtension = await this.createReloadManagerExtension(
+      specialStartingUrls
+    );
 
     // Start chrome pointing it to a given profile dir
     const extensions = [this.reloadManagerExtension]
@@ -145,8 +174,6 @@ export class ChromiumExtensionRunner {
     if (chromiumBinary) {
       log.debug(`(chromiumBinary: ${chromiumBinary})`);
     }
-
-    const chromeFlags = [...DEFAULT_CHROME_FLAGS];
 
     chromeFlags.push(`--load-extension=${extensions}`);
 
@@ -195,15 +222,6 @@ export class ChromiumExtensionRunner {
 
     if (profileDirName) {
       chromeFlags.push(`--profile-directory=${profileDirName}`);
-    }
-
-    let startingUrl;
-    if (this.params.startUrl) {
-      const startingUrls = Array.isArray(this.params.startUrl)
-        ? this.params.startUrl
-        : [this.params.startUrl];
-      startingUrl = startingUrls.shift();
-      chromeFlags.push(...startingUrls);
     }
 
     this.chromiumInstance = await this.chromiumLaunch({
@@ -265,7 +283,7 @@ export class ChromiumExtensionRunner {
     });
   }
 
-  async createReloadManagerExtension() {
+  async createReloadManagerExtension(specialStartingUrls) {
     const tmpDir = new TempDir();
     await tmpDir.create();
     this.registerCleanup(() => tmpDir.remove());
@@ -319,6 +337,18 @@ export class ChromiumExtensionRunner {
       const ws = new window.WebSocket(
         "ws://${wssInfo.address}:${wssInfo.port}");
 
+        
+      const chromeTabList = ${JSON.stringify(specialStartingUrls)}
+      if (chromeTabList.length > 0) {   
+        chrome.runtime.onInstalled.addListener(details => {
+          if (details.reason === chrome.runtime.OnInstalledReason.INSTALL ) {
+            chromeTabList.forEach(url => {
+              chrome.tabs.create({ url });
+            });
+          }           
+        });
+      }
+   
       ws.onmessage = async (evt) => {
         const msg = JSON.parse(evt.data);
         if (msg.type === 'webExtReloadAllExtensions') {

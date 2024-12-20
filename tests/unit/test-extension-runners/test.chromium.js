@@ -115,6 +115,55 @@ describe('util/extension-runners/chromium', async () => {
     await runnerInstance.exit();
   });
 
+  it(
+    'does insert special urls in companion extension ' +
+      '& excludes them from args',
+    async () => {
+      const { params } = prepareExtensionRunnerParams({
+        params: {
+          startUrl: [
+            'url1',
+            'chrome://version',
+            'url2',
+            'chrome://extensions',
+            'chrome-extension://id/page.html',
+          ],
+        },
+      });
+      const runnerInstance = new ChromiumExtensionRunner(params);
+      await runnerInstance.run();
+
+      const { reloadManagerExtension } = runnerInstance;
+
+      assert.equal(await fs.exists(reloadManagerExtension), true);
+
+      const bgScript = path.join(reloadManagerExtension, 'bg.js');
+      const expectedStr =
+        'const chromeTabList = ["chrome://version","chrome://extensions","chrome-extension://id/page.html"]';
+      assert.include(
+        await fs.readFile(bgScript, 'utf8'),
+        expectedStr,
+        'bg.js does not contain special urls'
+      );
+
+      sinon.assert.calledOnce(params.chromiumLaunch);
+      //assert special urls are not present
+      sinon.assert.calledWithMatch(params.chromiumLaunch, {
+        ignoreDefaultFlags: true,
+        enableExtensions: true,
+        chromePath: undefined,
+        chromeFlags: [
+          ...DEFAULT_CHROME_FLAGS,
+          'url2',
+          `--load-extension=${reloadManagerExtension},/fake/sourceDir`,
+        ],
+        startingUrl: 'url1',
+      });
+
+      await runnerInstance.exit();
+    }
+  );
+
   it('controls the "reload manager" from a websocket server', async () => {
     const { params } = prepareExtensionRunnerParams();
     const runnerInstance = new ChromiumExtensionRunner(params);
@@ -328,9 +377,9 @@ describe('util/extension-runners/chromium', async () => {
       chromePath: undefined,
       chromeFlags: [
         ...DEFAULT_CHROME_FLAGS,
-        `--load-extension=${reloadManagerExtension},/fake/sourceDir`,
         'url2',
         'url3',
+        `--load-extension=${reloadManagerExtension},/fake/sourceDir`,
       ],
       startingUrl: 'url1',
     });
@@ -358,12 +407,12 @@ describe('util/extension-runners/chromium', async () => {
       chromePath: undefined,
       chromeFlags: [
         ...DEFAULT_CHROME_FLAGS,
+        'url2',
+        'url3',
         `--load-extension=${reloadManagerExtension},/fake/sourceDir`,
         '--arg1',
         'arg2',
         '--arg3',
-        'url2',
-        'url3',
       ],
       startingUrl: 'url1',
     });
