@@ -54,6 +54,22 @@ export class MultiExtensionsReloadError extends WebExtError {
   }
 }
 
+export class UnusablePortError extends WebExtError {
+  constructor(message) {
+    super(message);
+  }
+}
+export class PortInUseError extends UnusablePortError {
+  constructor(message = 'The requested port is in use by another process') {
+    super(message);
+  }
+}
+export class PortInvalidError extends UnusablePortError {
+  constructor(message = 'The requested port cannot be used.') {
+    super(message);
+  }
+}
+
 /*
  * Sugar-y way to catch only instances of a certain error.
  *

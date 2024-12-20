@@ -16,6 +16,8 @@ import { createLogger } from '../util/logger.js';
 import { TempDir } from '../util/temp-dir.js';
 import isDirectory from '../util/is-directory.js';
 import fileExists from '../util/file-exists.js';
+import { validatePort } from '../util/verify-chromium-port.js';
+import { PortInUseError, PortInvalidError } from '../errors.js';
 
 const log = createLogger(import.meta.url);
 
@@ -154,6 +156,18 @@ export class ChromiumExtensionRunner {
       chromeFlags.push(...this.params.args);
     }
 
+    const { chromiumPort } = this.params;
+    if (chromiumPort) {
+      log.debug('(port: %d)', chromiumPort);
+      const isPortUsable = await validatePort(chromiumPort).catch((error) => {
+        throw new PortInvalidError(error.message);
+      });
+
+      if (!isPortUsable) {
+        throw new PortInUseError();
+      }
+    }
+
     // eslint-disable-next-line prefer-const
     let { userDataDir, profileDirName } =
       await ChromiumExtensionRunner.getProfilePaths(
@@ -214,8 +228,8 @@ export class ChromiumExtensionRunner {
       userDataDir,
       // Ignore default flags to keep the extension enabled.
       ignoreDefaultFlags: true,
+      port: chromiumPort,
     });
-
     this.chromiumInstance.process.once('close', () => {
       this.chromiumInstance = null;
 

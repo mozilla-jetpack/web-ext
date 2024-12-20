@@ -193,6 +193,15 @@ export class StubChildProcess extends EventEmitter {
   stderr = new EventEmitter();
   stdout = new EventEmitter();
   kill = sinon.spy(() => {});
+
+  constructor(params = {}) {
+    super();
+
+    // mimic chrome-launch and set a port property, defaulting to a random port
+    this.port = params.chromiumPort
+      ? params.chromiumPort
+      : getRandomInt(1024, 65536);
+  }
 }
 
 export function createFakeProcess() {
@@ -335,4 +344,10 @@ export function mockModule({
 
 export function resetMockModules() {
   td.reset();
+}
+
+export function getRandomInt(min, max) {
+  const _min = Math.ceil(min);
+  const _max = Math.floor(max);
+  return Math.floor(Math.random() * (_max - _min) + _min);
 }
