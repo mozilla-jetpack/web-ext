@@ -94,7 +94,7 @@
     "@babel/eslint-parser": "7.25.9",
     "@babel/preset-env": "7.26.0",
     "@babel/register": "7.25.9",
-    "@commitlint/cli": "19.6.0",
+    "@commitlint/cli": "19.6.1",
     "@commitlint/config-conventional": "19.6.0",
     "babel-plugin-istanbul": "7.0.0",
     "babel-plugin-transform-inline-environment-variables": "0.4.4",
