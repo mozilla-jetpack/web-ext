@@ -568,9 +568,21 @@ Example: $0 --help run.
           describe:
             'Path to an archive file containing human readable source code of this submission, ' +
             'if the code in --source-dir has been processed to make it unreadable. ' +
+            'Use --only-human-readable-source-code option if source code assets ' +
+            'in the submission are all human readable.' +
             'See https://extensionworkshop.com/documentation/publish/source-code-submission/ for ' +
             'details.',
           type: 'string',
+        },
+        'only-human-readable-source-code': {
+          describe:
+            'Signal that all source code assets in the xpi file are already human readable ' +
+            'and uploading a separate source code archive is not necessary.' +
+            'See https://extensionworkshop.com/documentation/publish/source-code-submission/ for ' +
+            'details.',
+          type: 'boolean',
+          demandOption: false,
+          default: null,
         },
       },
     )

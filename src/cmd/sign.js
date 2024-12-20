@@ -32,6 +32,7 @@ export default function sign(
     channel,
     amoMetadata,
     uploadSourceCode,
+    onlyHumanReadableSourceCode,
     webextVersion,
   },
   {
@@ -42,6 +43,20 @@ export default function sign(
   } = {},
 ) {
   return withTempDir(async function (tmpDir) {
+    if (!uploadSourceCode && !onlyHumanReadableSourceCode) {
+      throw new UsageError(
+        'Incomplete command. Either --upload-source-code or --only-human-readable-source-code ' +
+        'CLI options should be explicitly included in the sign command.'
+      );
+    }
+
+    if (uploadSourceCode && onlyHumanReadableSourceCode) {
+      throw new UsageError(
+        'Invalid options. Only one of --upload-source-code or --only-human-readable-source-code ' +
+        'CLI options should be included in the sign command.'
+      );
+    }
+
     await prepareArtifactsDir(artifactsDir);
 
     let manifestData;

@@ -60,6 +60,7 @@ describe('web-ext sign', () => {
         '--verbose',
         '--channel',
         'listed',
+        '--only-human-readable-source-code',
         '--amo-base-url',
         'http://localhost:8989/fake/api/v5',
         '--api-key',
@@ -97,6 +98,7 @@ describe('web-ext sign', () => {
             sign: {
               amoBaseUrl: 'http://localhost:8989/fake/api/v5',
               channel: 'listed',
+              onlyHumanReadableSourceCode: true,
             },
             sourceDir: srcDir,
           },

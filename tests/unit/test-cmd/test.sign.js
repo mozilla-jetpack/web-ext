@@ -57,15 +57,22 @@ describe('sign', () => {
    * Run the sign command with stubs for all dependencies.
    */
   function sign(tmpDir, stubs, { extraArgs = {}, extraOptions = {} } = {}) {
+    const signCLIOptions = {
+      verbose: false,
+      artifactsDir: path.join(tmpDir.path(), 'artifacts-dir'),
+      sourceDir: tmpDir.path(),
+      channel: 'listed',
+      ...stubs.signingConfig,
+      ...extraArgs,
+    };
+    if (
+      !('uploadSourceCode' in signCLIOptions) &&
+      !('onlyHumanReadableSourceCode' in signCLIOptions)
+    ) {
+      signCLIOptions.onlyHumanReadableSourceCode = true;
+    }
     return completeSignCommand(
-      {
-        verbose: false,
-        artifactsDir: path.join(tmpDir.path(), 'artifacts-dir'),
-        sourceDir: tmpDir.path(),
-        channel: 'listed',
-        ...stubs.signingConfig,
-        ...extraArgs,
-      },
+      signCLIOptions,
       {
         ...stubs.signingOptions,
         ...extraOptions,
@@ -89,6 +96,7 @@ describe('sign', () => {
                 sourceDir,
                 artifactsDir: path.join(tmpDir.path(), 'artifacts'),
                 channel: 'listed',
+                onlyHumanReadableSourceCode: true,
                 ...stubs.signingConfig,
                 apiProxy,
               },
@@ -143,6 +151,21 @@ describe('sign', () => {
         });
       });
     }));
+
+  it('rejects an UsageError if --upload-source-code or --only-human-readable-source-code are both falsey', async () => {
+    const signPromise = completeSignCommand({});
+    await assert.isRejected(signPromise, UsageError);
+    await assert.isRejected(signPromise, /Incomplete command. Either .* CLI options should be explicitly included/);
+  });
+
+  it('rejects an UsageError if --upload-source-code and --only-human-readable-source-code are both truthy', async () => {
+    const signPromise = completeSignCommand({
+      uploadSourceCode: 'fake-source-code-path.zip',
+      onlyHumanReadableSourceCode: true,
+    });
+    await assert.isRejected(signPromise, UsageError);
+    await assert.isRejected(signPromise, /Invalid options. Only one of .* CLI options should be included/);
+  });
 
   it('passes the uploadSourceCode parameter to submissionAPI signer as submissionSource', () =>
     withTempDir((tmpDir) => {
