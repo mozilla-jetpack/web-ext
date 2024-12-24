@@ -76,7 +76,7 @@
     "node-notifier": "10.0.1",
     "open": "9.1.0",
     "parse-json": "7.1.1",
-    "pino": "9.4.0",
+    "pino": "9.6.0",
     "promise-toolbox": "0.21.0",
     "source-map-support": "0.5.21",
     "strip-bom": "5.0.0",
