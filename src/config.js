@@ -157,7 +157,9 @@ export async function loadJSConfigFile(filePath) {
         await fs.readFile(resolvedFilePath, { encoding: 'utf-8' }),
       );
     } else {
-      configModule = await import(`file://${resolvedFilePath}?nonce=${nonce}`);
+      // https://github.com/vercel/ncc/issues/935
+      const _import = new Function('path', 'return import(path)');
+      configModule = await _import(`file://${resolvedFilePath}?nonce=${nonce}`);
     }
 
     if (configModule.default) {
