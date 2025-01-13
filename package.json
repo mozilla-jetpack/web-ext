@@ -104,7 +104,7 @@
     "crc-32": "1.2.2",
     "cross-env": "7.0.3",
     "deepcopy": "2.1.0",
-    "eslint": "8.57.0",
+    "eslint": "9.18.0",
     "eslint-plugin-async-await": "0.0.0",
     "eslint-plugin-import": "2.31.0",
     "fs-extra": "11.2.0",
